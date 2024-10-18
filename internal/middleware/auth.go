@@ -33,7 +33,7 @@ func Auth() fiber.Handler {
 		}
 
 		var user models.User
-		if err := database.DB.First(&user, userId).Error; err != nil {
+		if err := database.DB.Where("id = ?", userId).First(&user).Error; err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "User not found",
 			})

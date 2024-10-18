@@ -53,9 +53,10 @@ func GetTweets(c *fiber.Ctx) error {
 	}
 
 	if err := database.DB.Table("tweets").
-		Select("tweets.*, users.username, COUNT(DISTINCT likes.id) as likes, EXISTS(SELECT 1 FROM likes WHERE likes.tweet_id = tweets.id AND likes.user_id = ? ) as is_liked", user.ID).
+		Select("tweets.*, users.username, COUNT(DISTINCT all_likes.id) as likes, EXISTS(SELECT 1 FROM likes WHERE likes.tweet_id = tweets.id AND likes.user_id = ?) as is_liked", user.ID).
 		Joins("left join users on tweets.user_id = users.id").
-		Joins("left join likes on tweets.id = likes.tweet_id AND likes.user_id = ?", user.ID).
+		Joins("left join likes as all_likes on tweets.id = all_likes.tweet_id").
+		Joins("left join likes as user_likes on tweets.id = user_likes.tweet_id AND user_likes.user_id = ?", user.ID).
 		Group("tweets.id, users.username").
 		Order("tweets.created_at desc").
 		Offset(offset).Limit(pageSize).
